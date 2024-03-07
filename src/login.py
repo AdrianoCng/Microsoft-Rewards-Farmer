@@ -27,7 +27,7 @@ class Login:
                 break
             except Exception:  # pylint: disable=broad-except
                 try:
-                    self.utils.waitUntilVisible(By.ID, "loginHeader", 0.1)
+                    self.utils.waitUntilVisible(By.NAME, "loginfmt", 0.1)
                     break
                 except Exception:  # pylint: disable=broad-except
                     if self.utils.tryDismissAllMessages():
@@ -48,7 +48,7 @@ class Login:
         return points
 
     def executeLogin(self):
-        self.utils.waitUntilVisible(By.ID, "loginHeader", 10)
+        self.utils.waitUntilVisible(By.NAME, "loginfmt", 10)
         logging.info("[LOGIN] " + "Writing email...")
         self.webdriver.find_element(By.NAME, "loginfmt").send_keys(
             self.browser.username
@@ -82,15 +82,20 @@ class Login:
     def enterPassword(self, password):
         self.utils.waitUntilClickable(By.NAME, "passwd", 10)
         self.utils.waitUntilClickable(By.ID, "idSIButton9", 10)
-        # browser.webdriver.find_element(By.NAME, "passwd").send_keys(password)
         # If password contains special characters like " ' or \, send_keys() will not work
         password = password.replace("\\", "\\\\").replace('"', '\\"')
-        self.webdriver.execute_script(
-            f'document.getElementsByName("passwd")[0].value = "{password}";'
-        )
+        # self.webdriver.execute_script(
+        #     f'document.getElementsByName("passwd")[0].value = "{password}";'
+        # )
+        self.browser.webdriver.find_element(By.NAME, "passwd").send_keys(password)
         logging.info("[LOGIN] " + "Writing password...")
         self.webdriver.find_element(By.ID, "idSIButton9").click()
+        self.dismissStayLoginMessage()
         time.sleep(3)
+
+    def dismissStayLoginMessage(self):
+        self.utils.waitUntilClickable(By.ID, 'acceptButton')
+        self.webdriver.find_element(By.ID, 'acceptButton').click()
 
     def checkBingLogin(self):
         self.webdriver.get(
